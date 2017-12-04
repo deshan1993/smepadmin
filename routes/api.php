@@ -95,13 +95,43 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     Route::get('delete-keyword/{id}','API\KeywordController@deleteKeyword');
 
     /**
+    * for subject areas
+    */
+    Route::post('insert-subject-area','API\SubjectAreaController@insertSubjectArea');
+    Route::get('view-subject-area','API\SubjectAreaController@viewSubjectArea');
+    Route::get('edit-subject-area/{id}','API\SubjectAreaController@editSubjectArea');
+    Route::post('update-subject-area/{id}','API\SubjectAreaController@updateSubjectArea');
+    Route::get('delete-subject-area/{id}','API\SubjectAreaController@deleteSubjectArea');
+
+    /**
+    * for institutes
+    */
+    Route::post('insert-institute','API\InstituteController@insertInstitute');
+    Route::get('view-institute','API\InstituteController@viewInstitute');
+    Route::get('edit-institute/{id}','API\InstituteController@editInstitute');
+    Route::post('update-institute/{id}','API\InstituteController@updateInstitute');
+    Route::get('delete-institute/{id}','API\InstituteController@deleteInstitute');
+    Route::get('status-institute/{id}/{status}','API\InstituteController@statusInstitute');
+
+    /**
     * for authorizers
     */
+    Route::get('get-authorizer/{id}', 'API\AuthorizerController@index');
     Route::post('insert-authorizer', 'API\AuthorizerController@insertAuthorizer');
     Route::get('view-authorizers', 'API\AuthorizerController@viewAuthorizers');
     Route::get('edit-authorizer/{id}', 'API\AuthorizerController@editAuthorizer');
     Route::post('update-authorizer/{id}', 'API\AuthorizerController@updateAuthorizer');
-    Route::get('delete-authorizer', 'API\AuthorizerController@deleteAuthorizer');
+    Route::get('delete-authorizer/{id}', 'API\AuthorizerController@deleteAuthorizer');
+
+    /**
+    * for providers
+    */
+    Route::get('get-provider/{id}', 'API\ProviderController@index');
+    Route::post('insert-provider', 'API\ProviderController@insertProvider');
+    Route::get('view-providers', 'API\ProviderController@viewProviders');
+    Route::get('edit-provider/{id}', 'API\ProviderController@editProvider');
+    Route::post('update-provider/{id}', 'API\ProviderController@updateProvider');
+    Route::get('delete-provider/{id}', 'API\ProviderController@deleteProvider');
 
 
 });

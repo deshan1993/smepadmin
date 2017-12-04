@@ -101,7 +101,7 @@ class ConsumerController extends Controller
           'status' => $request->input('status')
         ];
         $table = new Consumer();
-        $modules = array(1,3,6);
+        $modules = array(6);
 
         $updateCon = DB::table('consumers')->whereIn('id', [$id])->update($update);
         if($updateCon){
