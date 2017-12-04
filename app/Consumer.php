@@ -12,6 +12,6 @@ class Consumer extends Model
 
     public function modules()
     {
-        return $this->belongsToMany('App\Module');
+        return $this->belongsToMany('App\Module')->withTimestamps();
     }
 }

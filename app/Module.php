@@ -13,5 +13,6 @@ class Module extends Model
     public function consumers()
     {
         return $this->belongsToMany('App\Consumer');
-    }    
+    }
+
 }

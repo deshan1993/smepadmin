@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\API;
 use App\Keyword;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Validation\Rule;
 use Validator;
 
 class KeywordController extends Controller
 {
-    //insert keywords
+    /**
+    * @param array $request post data
+    * @return message
+    */
     public function insertKeyword(Request $request){
       $validator = Validator::make($request->all(), [
         'en_name' => 'required',
@@ -26,58 +30,82 @@ class KeywordController extends Controller
         $table->ta_name = $request->input('ta_name');
         $table->save();
         if($table->save()){
-          return response()->json(['success'=>"Sucessfully added a keyword"]);
+          return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json(['error'=>"There is an error"]);
+          return response()->json(['error'=>'Error']);
         }
       }
     }
 
-    //view keywords
+    /**
+    * view keywords
+    */
     public function viewKeyword(){
       $table = new Keyword();
-      $data = DB::table('keywords')->pluck('name');
-      return response()->json($data);
+      $data = DB::table('keywords')->get();
+      if($data){
+        return response()->json($data);
+      }
+      else{
+        return reponse()->json(['error'=>'Error']);
+      }
     }
 
-    //update keywords
-    public function updateKeyword(Request $request){
+    /**
+    * @param id
+    * @return data set or message
+    */
+    public function editKeyword($id){
+      $data = DB::table('keywords')->where('id', $id)->get();
+      if($data){
+        return response()->json($data);
+      }
+      else{
+        return response()->json(['error'=>'Error']);
+      }
+    }
+
+    /**
+    * @param array $request post data and id
+    * @return message
+    */
+    public function updateKeyword(Request $request, $id){
       $validator = Validator::make($request->all(), [
-        'id' => 'required',
-        'name' => 'required'
+        'en_name' => 'required',
+        'si_name' => 'required',
+        'ta_name' => 'required'
       ]);
       if($validator->fails()){
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $update = ['name' => $request->input('name')];
-        $data = DB::table('keywords')->whereIn('id', [$request->input('id')])->update($update);
+        $update = [
+          'en_name' => $request->input('en_name'),
+          'si_name' => $request->input('si_name'),
+          'ta_name' => $request->input('ta_name')
+        ];
+        $data = DB::table('keywords')->whereIn('id', [$id])->update($update);
         if($data){
-          return response()->json("Updated successfully");
+          return response()->json(['success'=>'Successfully updated']);
         }
         else{
-          return response()->json("There is an error");
+          return response()->json(['error'=>'Error']);
         }
       }
     }
 
-    //delete keywords
-    public function deleteKeyword(Request $request){
-      $validator = Validator::make($request->all(), [
-        'id' => 'required'
-      ]);
-      if($validator->fails()){
-        return response()->json(['error'=>$validator->errors()], 401);
-      }
-      else{
-        $data = DB::table('keywords')->where('id', [$request->input('id')])->delete();
+    /**
+    * @param id
+    * @return message
+    */
+    public function deleteKeyword($id){
+        $data = DB::table('keywords')->where('id', [$id])->delete();
         if($data){
-          return response()->json("Successfully deleted");
+          return response()->json(['success'=>'Successfully deleted']);
         }
         else{
-          return response()->json("There is an error");
+          return response()->json(['error'=>'Error']);
         }
-      }
     }
 }

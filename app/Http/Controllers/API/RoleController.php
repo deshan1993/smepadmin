@@ -5,17 +5,23 @@ use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class RoleController extends Controller
-{
+{   public $successStatus = 200;
 
-    //function for insert roles
+    /**
+     * add new role
+     * @param  array $request post data
+     * @return 1 or errors
+     */
     public function insertRole(Request $request){
       $table = new Role();
 
       $validator = Validator::make($request->all(), [
-           'name' => 'required'
+           'name' => 'required',
+           'status' => 'required:boolean'
        ]);
 
        if ($validator->fails()) {
@@ -23,116 +29,108 @@ class RoleController extends Controller
        }
        else{
          $table->name = $request->input('name');
-
+         $table->status = $request->input('status');
          $table->save();
 
          if($table->save()){
-           return response()->json("Data saved");
+           return response()->json(['success'=>'Successfully inserted']);
          }
          else{
-           return response()->json("Error occured");
+           return response()->json(['error'=>'Error']);
          }
        }
     }
 
-    //function for view roles
+    /*
+    * view roles' details
+    */
     public function viewRoles(){
-      $data = DB::table('roles')->where('deleted', 0)->pluck('name');
-      if(count($data)){
+      $data = DB::table('roles')->where('deleted', 0)->get();
+      if($data){
         return response()->json($data);
       }
       else{
-        return response()->json("No data");
+        return response()->json(['error'=>'Error']);
       }
       }
 
-    //function for update the table
-    public function updateRole(Request $request){
-
-      $replaceName = $request->input('replaceName');
-
-      $validator = Validator::make($request->all(), [
-        'replaceName' => 'required'
-      ]);
-
-      if($validator->fails()){
-        return response()->json(['error'=>$validator->errors()], 401);
+    /**
+    * @param id
+    * @return 1 or 0
+    */
+    public function editRole($id){
+      $data = DB::table('roles')->where('id', [$id])->get();
+      if($data){
+        return response()->json($data);
       }
       else{
-        $table = new Role();
-
-        $update = [
-          'name' => $replaceName
-        ];
-
-        $data = DB::table('roles')->whereIn('id', [5])->update($update);
-        if(count($data)){
-          return response()->json('Successfully updated');
-        }
-        else{
-          return response()->json('Error occur');
-        }
+        return response()->json(['error'=>'Error']);
       }
     }
 
-    //function for delete the role
-    public function deleteRole(Request $request){
+    /**
+    * @param array $request post data
+    * @return 1 or 0
+    */
+    public function updateRole(Request $request, $id){
 
-      $validator = Validator::make($request->all(), [
-        'name' => 'required'
-      ]);
+        $table = new Role();
+
+        $update = [
+          'name' => $request->input('name'),
+          'status' => $request->input('status')
+        ];
+
+        $data = DB::table('roles')->whereIn('id', [$id])->update($update);
+        if($data){
+          return response()->json(['success'=>'Successfully updated']);
+        }
+        else{
+          return response()->json(['error'=>'Error']);
+        }
+
+    }
+
+    /**
+     * @param id
+     * @return delete status
+     */
+    public function deleteRole(Request $request, $id){
 
       $update = [
         'deleted' => 1
       ];
 
-      if($validator->fails()){
-        return response()->json(['error'=>$validator->errors()], 401);
-      }
-      else{
-        $name = $request->input('name');
-        $data = DB::table('roles')->whereIn('name', [$name])->update($update);
-      }
+      $data = DB::table('roles')->whereIn('id', [$id])->update($update);
 
-      if(count($data)){
-        return response()->json("Successfully Deleted");
+      if($data){
+        return response()->json(['success'=>'Successfully deleted']);
       }
       else{
-        return respons()->json("Error occured");
+        return respons()->json(['error'=>'Error']);
       }
     }
 
-    //function for enable disable
-    public function updateStatus(Request $request){
-      // 0 = disable, 1 = enable
-
-      $validator = Validator::make($request->all(), [
-        'name' => 'required',
-        'status' => 'required|boolean'
-      ]);
-
-      if($validator->fails()){
-        return response()->json(['error'=>$validator->errors()], 401);
-      }
-      else{
-        $name = $request->input('name');
-        $status = $request->input('status');
-
-        $update = ['status' => $status];
-
-        $data = DB::table('roles')->whereIn('name', [$name])->update($update);
-      }
-
-      if(count($data)){
+    /**
+    * @param array get data
+    * @return message
+    */
+    public function statusRole($id, $status){
+      $update = [
+        'status' => $status
+      ];
+      $data = DB::table('roles')->where('id', $id)->update($update);
+      if($data){
         if($status == 1){
-          return response()->json("Successfully enble");
+          return response()->json(['success'=>'Successfully enabled']);
         }
         else{
-          return response()->json("Successfully disable");
+          return response()->json(['success'=>'Successfully disabled']);
         }
       }
       else{
-        return response()->json("Have an error with database");
+        return response()->json(['error'=>'Error']);
       }
     }
+
 }

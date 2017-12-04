@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 use App\Module;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -10,7 +10,13 @@ use Validator;
 
 class ModuleController extends Controller
 {
-    //insert module data
+    public $successStatus = 200;
+
+    /**
+     * add module
+     * @param  array $request post data
+     * @return 1 or errors
+     */
     public function addModule(Request $request){
       $validator = Validator::make($request->all(), [
         'moduleName' => 'required'
@@ -25,24 +31,49 @@ class ModuleController extends Controller
         $table->save();
 
         if($table->save()){
-          return response()->json("Successfully inserted");
+          return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json("Error occur");
+          return response()->json(['error'=>'Error']);
         }
       }
     }
 
-    //view module Data
+    /*
+    * view module details
+    */
     public function viewModule(){
-      $data = DB::table('modules')->pluck('module_name');
-      return response()->json($data);
+      $data = DB::table('modules')->get();
+      if($data){
+        return response()->json($data);
+      }
+      else{
+        return response()->json(['error'=>'Error']);
+      }
     }
 
-    //edit module
-    public function updateModule(Request $request){
+    /**
+     * @param id
+     * Get module data for update
+     */
+    public function getModule($id){
+
+      $data = DB::table('modules')->where('id', [$id])->get();
+      if($data){
+        return response()->json($data);
+      }
+      else{
+        return response()->json(['error'=>'Error']);
+      }
+    }
+
+    /**
+     * Module update request
+     * @param  array $request post data and id
+     * @return 1 or errors
+     */
+    public function updateModule(Request $request, $id){
       $validator = Validator::make($request->all(), [
-        'id' => 'required',
         'moduleName' => 'required'
       ]);
 
@@ -50,45 +81,31 @@ class ModuleController extends Controller
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $id = $request->input('id');
         $update = ['module_name' => $request->input('moduleName')];
         $data = DB::table('modules')->whereIn('id', [$id])->update($update);
 
         if($data){
-          return response()->json("Successfully updated");
+          return response()->json(['success'=>'Successfully updated']);
         }
         else{
-          return response()->json("There is an error");
+          return response()->json(['error'=>'Error']);
         }
       }
     }
 
-    //delete modules
-    public function deleteModule(Request $request){
-      $validator = Validator::make($request->all(), [
-        'id' => 'required'
-      ]);
+    /**
+     * @param array $request post data and id
+     * @return delete status
+     */
+    public function deleteModule(Request $request, $id){
 
-      if($validator->fails()){
-        return response()->json(['error'=>$validator->errors()], 401);
-      }
-      else{
-        $id = $request->input('id');
-        $data1 = DB::select("SELECT id FROM modules WHERE id=:id",['id'=>$id]);
-        if(count($data1)>0){
-          $data = DB::table('modules')->WHERE('id', $id)->delete();
+        $data = DB::table('modules')->WHERE('id', $id)->delete();
 
-          if($data){
-            return response()->json("Successfully deleted");
-          }
-          else{
-            return response()->json("Error occured");
-          }
+        if($data){
+          return response()->json(['success'=>'Successfully deleted']);
         }
         else{
-          return response()->json("Entered id can't be found");
+          return response()->json(['error'=>'Error']);
         }
-
-      }
     }
 }

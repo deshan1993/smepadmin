@@ -69,5 +69,13 @@ class User extends Authenticatable
         return $this->belongsToMany('App\institute');
     }
 
+    /**
+    * User and subject area relationship
+    */
+    public function subjectAreas()
+    {
+        return $this->belongsToMany('App\Subject_area')->withTimestamps();
+    }
+
 
 }
