@@ -106,6 +106,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     /**
     * for institutes
     */
+    Route::get('get-institute','API\InstituteController@index');
     Route::post('insert-institute','API\InstituteController@insertInstitute');
     Route::get('view-institute','API\InstituteController@viewInstitute');
     Route::get('edit-institute/{id}','API\InstituteController@editInstitute');

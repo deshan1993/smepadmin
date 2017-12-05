@@ -10,7 +10,12 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 
 class InstituteController extends Controller
-{
+{   
+    public function index(){
+        $institute = Institute::with('instituteUsers')->where('id', [14])->get();
+        return response()->json($institute);
+    }
+
     /**
     * @param array $request post data
     * @return message
@@ -23,7 +28,18 @@ class InstituteController extends Controller
     		'contact_number' => 'required|numeric',
     		'email' => 'required|email',
     		'address' => 'required',
-    		'status' => 'required|boolean'
+    		'status' => 'required|boolean',
+            'user_name' => 'required',
+            'user_email' => 'required|email',
+            'user_password' => 'required',
+            'user_c_password' => 'required|same:user_password',
+            'user_status' => 'required',
+            'user_name_with_initials' => 'required',
+            'user_gender' => 'required',
+            'user_nic' => 'required',
+            'user_mobile' => 'required',
+            'user_designation' => 'required',
+            'user_birthday' => 'required|date'
     	]);
     	if($validator->fails()){
     		return response()->json(['error'=>$validator->errors()], 401);
@@ -40,6 +56,25 @@ class InstituteController extends Controller
     		$table->save();
 
     		if($table->save()){
+                $user_details = array(
+                    'name' => $request->input('user_name'),
+                    'email' => $request->input('user_email'),
+                    'password' => bcrypt($request->input('user_password')),
+                    'status' => $request->input('user_status'),
+                    'name_with_initials' => $request->input('user_name_with_initials'),
+                    'gender' => $request->input('user_gender'),
+                    'nic' => $request->input('user_nic'),
+                    'mobile' => $request->input('user_mobile'),
+                    'designation' => $request->input('user_designation'),
+                    'birthday' => $request->input('user_birthday'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'role_id' => 5
+                );
+
+                $insert_user_id = $table->users()->insertGetId($user_details);
+                $id = array($insert_user_id); 
+                $data = $table->instituteUsers()->attach($id);
     			return response()->json(['success'=>'Successfully inserted']);
     		}
     		else{
@@ -67,7 +102,12 @@ class InstituteController extends Controller
     * @return dataset or message
     */
     public function editInstitute($id){
-    	$editData = DB::table('institutes')->where('id', [$id])->get();
+    	//$editData = DB::table('institutes')->where('id', [$id])->get();
+        $editData = Institute::with(
+            array('instituteUsers' => function($query){
+                $query->where('role_id', 5); 
+            })
+        )->where([['id', '=', $id],])->get();
     	if($editData){
     		return response()->json($editData);
     	}
@@ -88,7 +128,18 @@ class InstituteController extends Controller
     		'contact_number' => 'required|numeric',
     		'email' => 'required|email',
     		'address' => 'required',
-    		'status' => 'required|boolean'
+    		'status' => 'required|boolean',
+            'user_name' => 'required',
+            'user_email' => 'required|email',
+            'user_password' => 'required',
+            'user_c_password' => 'required|same:user_password',
+            'user_status' => 'required',
+            'user_name_with_initials' => 'required',
+            'user_gender' => 'required',
+            'user_nic' => 'required',
+            'user_mobile' => 'required',
+            'user_designation' => 'required',
+            'user_birthday' => 'required|date'
     	]);
     	if($validator->fails()){
     		return response()->json(['error'=>$validator->errors()], 401);
@@ -128,7 +179,7 @@ class InstituteController extends Controller
     	else{
     		return response()->json(['error'=>'Error occured'], 401);
     	}
-    }
+    }     
 
     /**
     * @param get id and status data
