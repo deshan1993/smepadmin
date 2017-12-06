@@ -62,6 +62,8 @@ class AuthorizerController extends Controller
     		$user_table->designation = $request->input('designation');
     		$user_table->birthday = $request->input('birthday');
     		$user_table->role_id = $role_id;
+            $user_table->created_at = now();
+            $user_table->updated_at = now();
     		$user_table->save();
 
     		$highest_edu_quali = array(
@@ -170,7 +172,8 @@ class AuthorizerController extends Controller
                 'nic' => $request->input('nic'),
                 'mobile' => $request->input('mobile'),
                 'designation' => $request->input('designation'),
-                'birthday' => $request->input('birthday')
+                'birthday' => $request->input('birthday'),
+                'updated_at' => now()
             ];
 
             $highest_edu_quali = array(
@@ -180,7 +183,6 @@ class AuthorizerController extends Controller
                 'grade' => $request->input('highest_grade'),
                 'year' => $request->input('highest_year'),
                 'country_id' => $request->input('country_id'),
-                'created_at' => now(),
                 'updated_at' => now()]
             );
 
@@ -190,15 +192,15 @@ class AuthorizerController extends Controller
                     'university' => 'colombo uni',
                     'grade' => 'A',
                     'year' => 2015,
-                    'created_at' => now(),
                     'updated_at' => now(),
                     'country_id' => 10
                 ]
             );
 
-            $updateAuthorizer = DB::table('users')->whereIn('id', [$id])->update($update);
-            if($updateAuthorizer){
-                
+            try{
+
+                $updateAuthorizer = DB::table('users')->whereIn('id', [$id])->update($update);
+            
                 $authorizer = User::find($id);
                 $authorizer->highestEducation()->delete();
                 $updateHighestQuali = $authorizer->highestEducation()->insert($highest_edu_quali);
@@ -207,9 +209,10 @@ class AuthorizerController extends Controller
                 $updateProffQuali = $authorizer->professionalEducations()->insert($proff_edu_quali);
                 return response()->json(['success'=>'Successfully updated']);
             }
-            else{
-                return response()->json(['error'=>'Error occured']);
+            catch(\Illuminate\Database\QueryException $ex){
+                return response()->json($ex->getMessage());
             }
+            
         }
     }
 

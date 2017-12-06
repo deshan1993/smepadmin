@@ -12,6 +12,8 @@ class User extends Authenticatable
     /**
     * table name changed to users to sm_users 
     */ 
+    public $timestamps = false;
+
     protected $table= "users";
     /**
      * The attributes that are mass assignable.

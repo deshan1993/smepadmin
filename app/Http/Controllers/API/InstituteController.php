@@ -145,24 +145,56 @@ class InstituteController extends Controller
     		return response()->json(['error'=>$validator->errors()], 401);
     	}
     	else{
-    		$update = [
-    			'name' => $request->input('name'),
-    			'registration_number' => $request->input('registration_number'),
-    			'registered_date' => $request->input('registered_date'),
-    			'contact_number' => $request->input('contact_number'),
-    			'email' => $request->input('email'),
-    			'address' => $request->input('address'),
-    			'status' => $request->input('status')
-    		];
 
-    		$updateData = DB::table('institutes')->whereIn('id', [$id])->update($update);
+            try{
 
-    		if($updateData){
-    			return response()->json(['success'=>'Successfully updated']);
-    		}
-    		else{
-    			return response()->json(['error'=>'Error occured']);
-    		}
+                $update = [
+                'name' => $request->input('name'),
+                'registration_number' => $request->input('registration_number'),
+                'registered_date' => $request->input('registered_date'),
+                'contact_number' => $request->input('contact_number'),
+                'email' => $request->input('email'),
+                'address' => $request->input('address'),
+                'status' => $request->input('status')
+                ];
+
+            $username = $request->input('user_name');
+            $updateData = DB::table('institutes')->whereIn('id', [$id])->update($update);
+           
+           $user_name = $request->input('user_name');
+           $user_email = $request->input('user_email');
+           $user_password = bcrypt($request->input('user_password'));
+           $user_status = $request->input('user_status');
+           $user_name_with_initials = $request->input('user_name_with_initials');
+           $user_gender = $request->input('user_gender');
+           $user_nic = $request->input('user_nic');
+           $user_mobile = $request->input('user_mobile');
+           $user_designation = $request->input('user_designation');
+           $user_birthday = $request->input('user_birthday');
+
+            $editData = Institute::with(
+                array('instituteUsers' => function($query) use ($user_name,$user_email,$user_password,$user_status,$user_name_with_initials,$user_gender,$user_nic,$user_mobile,$user_designation,$user_birthday){
+                    $query->where('role_id', 5)->update([
+                        'name' => $user_name,
+                        'email' => $user_email,
+                        'password' => $user_password,
+                        'status' => $user_status,
+                        'name_with_initials' => $user_name_with_initials,
+                        'gender' => $user_gender,
+                        'nic' => $user_nic,
+                        'mobile' => $user_mobile,
+                        'designation' => $user_designation,
+                        'birthday' => $user_birthday
+                    ]); 
+                })
+            )->where([['id', '=', $id],])->get();
+
+            return response()->json(['success'=>'Successfully updated']);
+
+            }
+            catch(\Illuminate\Database\QueryException $ex){
+                return response()->json($ex->getMessage());
+            }	
     	}
     }
 
@@ -174,6 +206,15 @@ class InstituteController extends Controller
     	$update = ['deleted' => 1];
     	$deleteInstitute = DB::table('institutes')->whereIn('id', [$id])->update($update);
     	if($deleteInstitute){
+
+            $deleteInstituteUser = Institute::with(
+                array('instituteUsers' => function($query){
+                    $query->where('role_id', 5)->update([
+                        'deleted' => 1
+                    ]); 
+                })
+            )->where([['id', '=', $id],])->get();
+
     		return response()->json(['success'=>'Successfully deleted']);
     	}
     	else{
@@ -190,9 +231,27 @@ class InstituteController extends Controller
     	$updateStatus = DB::table('institutes')->whereIn('id', [$id])->update($update);
     	if($updateStatus){
     		if($status == 1){
-    			return response()->json(['success'=>'Successfully enabled']);
+
+                $enableUser = Institute::with(
+                array('instituteUsers' => function($query) use ($status){
+                    $query->where('role_id', 5)->update([
+                        'status' => $status
+                    ]); 
+                })
+                )->where([['id', '=', $id],])->get();
+
+    		  	return response()->json(['success'=>'Successfully enabled']);
     		}
-    		else{
+    		if($status == 0){
+
+                $enableUser = Institute::with(
+                array('instituteUsers' => function($query) use ($status){
+                    $query->where('role_id', 5)->update([
+                        'status' => $status
+                    ]); 
+                })
+                )->where([['id', '=', $id],])->get();
+
     			return response()->json(['success'=>'Successfully disabled']);
     		}
     	}

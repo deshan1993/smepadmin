@@ -84,7 +84,7 @@ class AuthorController extends Controller
       if($validator->fails()){
         return response()->json(['error'=>$validator->errors()], 401);
       }
-      else{
+      try{
         $en_name = $request->input('en_name');
         $si_name = $request->input('si_name');
         $ta_name = $request->input('ta_name');
@@ -94,12 +94,10 @@ class AuthorController extends Controller
           'ta_name' => $ta_name
         ];
         $data = DB::table('authors')->whereIn('id', [$id])->update($update);
-        if($data){
-          return response()->json(['success'=>'Successfully updated']);
-        }
-        else{
-          return reponse()->json(['error'=>'Error']);
-        }
+        return response()->json(['success'=>'Successfully updated']);
+      }
+      catch(\Illuminate\Database\QueryException $ex){
+        return response()->json($ex->getMessage());
       }
     }
 
