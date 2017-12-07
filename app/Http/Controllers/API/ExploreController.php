@@ -40,7 +40,7 @@ class ExploreController extends Controller
         }
         $input = $request->all();
         $this->create($input);
-        return response()->json(['success'=>1], $this->successStatus);        
+        return response()->json(['success'=>'Successfully inserted'], $this->successStatus);        
     }
 
     /**
@@ -63,7 +63,7 @@ class ExploreController extends Controller
         }
         $input = $request->all();
         $this->update($id, $input);
-        return response()->json(['success'=>1], $this->successStatus);  
+        return response()->json(['success'=>'Successfully updated'], $this->successStatus);  
     }
 
     /**

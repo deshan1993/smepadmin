@@ -36,7 +36,7 @@ class RoleController extends Controller
            return response()->json(['success'=>'Successfully inserted']);
          }
          else{
-           return response()->json(['error'=>'Error']);
+           return response()->json(['error'=>'Error occured']);
          }
        }
     }
@@ -50,7 +50,7 @@ class RoleController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
       }
 
@@ -64,7 +64,7 @@ class RoleController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -74,21 +74,31 @@ class RoleController extends Controller
     */
     public function updateRole(Request $request, $id){
 
-        $table = new Role();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'status' => 'required|boolean'
+        ]);
 
-        $update = [
-          'name' => $request->input('name'),
-          'status' => $request->input('status')
-        ];
-
-        $data = DB::table('roles')->whereIn('id', [$id])->update($update);
-        if($data){
-          return response()->json(['success'=>'Successfully updated']);
+        if($validator->fails()){
+          return response()->json(['error'=>$validator->errors()], 401);
         }
         else{
-          return response()->json(['error'=>'Error']);
-        }
+          try{
+            $table = new Role();
 
+            $update = [
+              'name' => $request->input('name'),
+              'status' => $request->input('status'),
+              'updated_at' => now()
+            ];
+
+            $data = DB::table('roles')->whereIn('id', [$id])->update($update);
+            return response()->json(['success'=>'Successfully updated']);
+          }
+          catch(\Illuminate\Database\QueryException $ex){
+            return response()->json($ex->getMessage());
+          }
+        }
     }
 
     /**
@@ -107,7 +117,7 @@ class RoleController extends Controller
         return response()->json(['success'=>'Successfully deleted']);
       }
       else{
-        return respons()->json(['error'=>'Error']);
+        return respons()->json(['error'=>'Error occured']);
       }
     }
 
@@ -129,7 +139,7 @@ class RoleController extends Controller
         }
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 

@@ -95,25 +95,28 @@ class ConsumerController extends Controller
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $update = [
-          'name' => $request->input('name'),
-          'url' => $request->input('url'),
-          'status' => $request->input('status')
-        ];
-        $table = new Consumer();
-        $modules = array(6);
+        try{
 
-        $updateCon = DB::table('consumers')->whereIn('id', [$id])->update($update);
-        if($updateCon){
+            $update = [
+            'name' => $request->input('name'),
+            'url' => $request->input('url'),
+            'status' => $request->input('status')
+            ];
+
+          $table = new Consumer();
+          $modules = array(6);
+
+          $updateCon = DB::table('consumers')->whereIn('id', [$id])->update($update);
+
           $consumer = Consumer::find($id);
           $consumer->modules()->detach();
           $table->id = $id;
           $updateModules = $table->modules()->attach($modules);
           return response()->json(['success'=>'Successfully updated']);
         }
-        else{
-            return response()->json(['error'=>'There is an error to update']);
-        } 
+        catch(\Illuminate\Database\QueryException $ex){
+            return response()->json($ex->getMessage());
+        }
       }
     }
 

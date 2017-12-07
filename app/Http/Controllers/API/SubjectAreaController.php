@@ -75,22 +75,24 @@ class SubjectAreaController extends Controller
     		'description' => 'required'
     	]);
 
-    	$update = [
-    		'name' => $request->input('name'),
-    		'description' => $request->input('description')
-    	];
-
     	if($validator->fails()){
     		return response()->json(['error'=>$validator->errors()], 401);
     	}
     	else{
-    		$updateData = DB::table('subject_areas')->whereIn('id', [$id])->update($update);
-    		if($updateData){
-    			return response()->json(['success'=>'Successfully updated']);
-    		}
-    		else{
-    			return response()->json(['error'=>'Error occured']);
-    		}
+            try{
+                $update = [
+                    'name' => $request->input('name'),
+                    'description' => $request->input('description'),
+                    'updated_at' => now()
+                ];
+
+                $updateData = DB::table('subject_areas')->whereIn('id', [$id])->update($update);
+                return response()->json(['success'=>'Successfully updated']);
+
+            }
+            catch(\Illuminate\Database\QueryException $ex){
+                return response()->json($ex->getMessage());
+            }
     	}
     }
 

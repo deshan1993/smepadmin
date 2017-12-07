@@ -37,7 +37,7 @@ class CategoryController extends Controller
           return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
       }
     }
@@ -52,7 +52,7 @@ class CategoryController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -66,7 +66,7 @@ class CategoryController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -86,18 +86,22 @@ class CategoryController extends Controller
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $update = [
+        try{
+
+          $update = [
           'en_name' => $request->input('en_name'),
           'si_name' => $request->input('si_name'),
           'ta_name' => $request->input('ta_name'),
-          'status' => $request->input('status')
-        ];
-        $data = DB::table('categories')->whereIn('id', [$id])->update($update);
-        if($data){
+          'status' => $request->input('status'),
+          'updated_at' => now()
+          ];
+
+          $data = DB::table('categories')->whereIn('id', [$id])->update($update);
           return response()->json(['success'=>'Successfully updated']);
+
         }
-        else{
-          return response()->json(['error'=>'Error']);
+        catch(\Illuminate\Database\QueryException $ex){
+            return response()->json($ex->getMessage());
         }
       }
     }
@@ -113,7 +117,7 @@ class CategoryController extends Controller
         return response()->json(['success'=>'Successfully deleted']);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -136,7 +140,7 @@ class CategoryController extends Controller
         }
       }
       else{
-        return response()->json(['error'=>'error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 }

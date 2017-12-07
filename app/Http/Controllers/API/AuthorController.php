@@ -36,7 +36,7 @@ class AuthorController extends Controller
           return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
       }
     }
@@ -52,7 +52,7 @@ class AuthorController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
 
     }
@@ -67,7 +67,7 @@ class AuthorController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -113,7 +113,7 @@ class AuthorController extends Controller
         return response()->json(['success'=>'Successfully deleted']);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error ocuured']);
       }
     }
 }

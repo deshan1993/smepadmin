@@ -156,49 +156,48 @@ class ProviderController extends Controller
             return response()->json(['error'=>$validator->errors()], 401);
         }
         else{
-            $table = new User();
-            $table->id = $id;
 
-            $update = [
-                'name' => $request->input('name'),
-                'email' => $request->input('email'),
-                'password' => bcrypt($request->input('password')),
-                'status' => $request->input('status'),
-                'deleted' => $request->input('deleted'),
-                'name_with_initials' => $request->input('name_with_initials'),
-                'gender' => $request->input('gender'),
-                'nic' => $request->input('nic'),
-                'mobile' => $request->input('mobile'),
-                'designation' => $request->input('designation'),
-                'birthday' => $request->input('birthday')
-            ];
+            try{
+                $table = new User();
+                $table->id = $id;
 
-            $highest_edu_quali = array(
-                ['user_id' => $table->id,
-                'qualification'=> $request->input('highest_qualification'),
-                'university' => $request->input('highest_university'),
-                'grade' => $request->input('highest_grade'),
-                'year' => $request->input('highest_year'),
-                'country_id' => $request->input('country_id'),
-                'created_at' => now(),
-                'updated_at' => now()]
-            );
+                $update = [
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                    'password' => bcrypt($request->input('password')),
+                    'status' => $request->input('status'),
+                    'deleted' => $request->input('deleted'),
+                    'name_with_initials' => $request->input('name_with_initials'),
+                    'gender' => $request->input('gender'),
+                    'nic' => $request->input('nic'),
+                    'mobile' => $request->input('mobile'),
+                    'designation' => $request->input('designation'),
+                    'birthday' => $request->input('birthday'),
+                    'updated_at' => now()
+                ];
 
-            $proff_edu_quali = array(
-                [   'user_id' => $table->id,
-                    'qualification' => 'MSC',
-                    'university' => 'colombo uni',
-                    'grade' => 'A',
-                    'year' => 2015,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                    'country_id' => 10
-                ]
-            );
+                $highest_edu_quali = array(
+                    ['user_id' => $table->id,
+                    'qualification'=> $request->input('highest_qualification'),
+                    'university' => $request->input('highest_university'),
+                    'grade' => $request->input('highest_grade'),
+                    'year' => $request->input('highest_year'),
+                    'country_id' => $request->input('country_id'),
+                    'updated_at' => now()]
+                );
 
-            $updateProviders = DB::table('users')->whereIn('id', [$id])->update($update);
-            if($updateProviders){
-                
+                $proff_edu_quali = array(
+                    [   'user_id' => $table->id,
+                        'qualification' => 'MSC',
+                        'university' => 'colombo uni',
+                        'grade' => 'A',
+                        'year' => 2015,
+                        'updated_at' => now(),
+                        'country_id' => 10
+                    ]
+                );
+
+                $updateProviders = DB::table('users')->whereIn('id', [$id])->update($update);
                 $provider = User::find($id);
                 $provider->highestEducation()->delete();
                 $updateHighestQuali = $provider->highestEducation()->insert($highest_edu_quali);
@@ -207,8 +206,8 @@ class ProviderController extends Controller
                 $updateProffQuali = $provider->professionalEducations()->insert($proff_edu_quali);
                 return response()->json(['success'=>'Successfully updated']);
             }
-            else{
-                return response()->json(['error'=>'Error occured']);
+            catch(\Illuminate\Database\QueryException $ex){
+                return response()->json($ex->getMessage());
             }
         }
     }

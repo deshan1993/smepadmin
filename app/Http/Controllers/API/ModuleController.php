@@ -34,7 +34,7 @@ class ModuleController extends Controller
           return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
       }
     }
@@ -48,7 +48,7 @@ class ModuleController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -63,7 +63,7 @@ class ModuleController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -81,14 +81,19 @@ class ModuleController extends Controller
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $update = ['module_name' => $request->input('moduleName')];
-        $data = DB::table('modules')->whereIn('id', [$id])->update($update);
+        try{
 
-        if($data){
-          return response()->json(['success'=>'Successfully updated']);
+            $update = [
+              'module_name' => $request->input('moduleName'),
+              'updated_at' => now()
+            ];
+
+            $data = DB::table('modules')->whereIn('id', [$id])->update($update);
+
+            return response()->json(['success'=>'Successfully updated']);
         }
-        else{
-          return response()->json(['error'=>'Error']);
+        catch(\Illuminate\Database\QueryException $ex){
+            return response()->json($ex->getMessage());
         }
       }
     }
@@ -105,7 +110,7 @@ class ModuleController extends Controller
           return response()->json(['success'=>'Successfully deleted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
     }
 }

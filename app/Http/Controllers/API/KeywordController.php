@@ -33,7 +33,7 @@ class KeywordController extends Controller
           return response()->json(['success'=>'Successfully inserted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
       }
     }
@@ -48,7 +48,7 @@ class KeywordController extends Controller
         return response()->json($data);
       }
       else{
-        return reponse()->json(['error'=>'Error']);
+        return reponse()->json(['error'=>'Error occured']);
       }
     }
 
@@ -62,7 +62,7 @@ class KeywordController extends Controller
         return response()->json($data);
       }
       else{
-        return response()->json(['error'=>'Error']);
+        return response()->json(['error'=>'Error occured']);
       }
     }
 
@@ -80,17 +80,20 @@ class KeywordController extends Controller
         return response()->json(['error'=>$validator->errors()], 401);
       }
       else{
-        $update = [
+        try{
+          $update = [
           'en_name' => $request->input('en_name'),
           'si_name' => $request->input('si_name'),
-          'ta_name' => $request->input('ta_name')
-        ];
-        $data = DB::table('keywords')->whereIn('id', [$id])->update($update);
-        if($data){
+          'ta_name' => $request->input('ta_name'),
+          'updated_at' => now()
+          ];
+
+          $data = DB::table('keywords')->whereIn('id', [$id])->update($update);
           return response()->json(['success'=>'Successfully updated']);
+
         }
-        else{
-          return response()->json(['error'=>'Error']);
+        catch(\Illuminate\Database\QueryException $ex){
+          return response()->json($ex->getMessage());
         }
       }
     }
@@ -105,7 +108,7 @@ class KeywordController extends Controller
           return response()->json(['success'=>'Successfully deleted']);
         }
         else{
-          return response()->json(['error'=>'Error']);
+          return response()->json(['error'=>'Error occured']);
         }
     }
 }
